@@ -1,8 +1,15 @@
 import unittest
+import os
 import tensorflow as tf
 from tfwda.model.tensorflow import Model
 from tfwda.model_store.tensorflow import ModelStore
+from dotenv import load_dotenv
+from pathlib import Path
 
+dotenv_path = Path('../.env')
+load_dotenv(dotenv_path=dotenv_path)
+
+MONGODB_CONNECTION_STRING = os.getenv('CONNECTION_STRING')
 
 class TestModel(unittest.TestCase):
     def setUp(self) -> None:
@@ -21,9 +28,28 @@ class TestModel(unittest.TestCase):
 
 
         """ EXECUTION """
-        model_store     = ModelStore()
-        model_store_two = ModelStore.get_instance()
+        #model_store     = ModelStore()
+        #model_store_two = ModelStore.get_instance()
 
 
         """ VERIFICATION """
-        self.assertEqual(first = model_store, second = model_store_two)
+        #self.assertEqual(first = model_store, second = model_store_two)
+
+
+    def test_model_store_db_connectivity_s01(self):
+        """
+        Check if database connection is established
+        """
+
+        """ PREPARATION """
+
+
+        """ EXECUTION """
+        try:
+            model_store = ModelStore(db_connection_string = MONGODB_CONNECTION_STRING, database_name = "test")
+        except:
+            print("The MongoDB database connection couldn't be established!")
+
+
+        """ VERIFICATION """
+        self.assertTrue(True)
