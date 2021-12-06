@@ -3,11 +3,11 @@ import abc
 from abc import abstractmethod
 
 
-class IF_Model(metaclass=abc.ABCMeta):
+class IFModel(metaclass=abc.ABCMeta):
     pass
 
 
-class Model(IF_Model):
+class Model(IFModel):
     """
     Model holds all architecture relevant information, e.g. like summary,
     weights and the architecture itself
@@ -16,10 +16,8 @@ class Model(IF_Model):
         - architecture  : tf.python.keras.engine.functional.Functional -> Keras/Tensorflow model
     """
 
-    name         : str
-    architecture : tf.python.keras.engine.functional.Functional
 
-    def __init__(self, name, architecture):
+    def __init__(self, name: str, architecture: tf.python.keras.engine.functional.Functional) -> None:
         self.name         = name
         if not isinstance(architecture, tf.python.keras.engine.functional.Functional):
             raise TypeError('The architecture variable has to be of type tf.python.keras.engine.functional.Functional!')

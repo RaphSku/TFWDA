@@ -1,5 +1,6 @@
 import unittest
 import tensorflow as tf
+
 from tfwda.model.tensorflow import Model
 
 

@@ -4,12 +4,11 @@ import tensorflow as tf
 from tfwda.model.tensorflow import Model
 from tfwda.model_store.tensorflow import ModelStore
 from dotenv import load_dotenv
-from pathlib import Path
 
-dotenv_path = Path('../.env')
-load_dotenv(dotenv_path=dotenv_path)
+load_dotenv()
 
 MONGODB_CONNECTION_STRING = os.getenv('CONNECTION_STRING')
+PLOT_FOLDER_PATH          = os.getenv('PLOT_FOLDER_PATH')
 
 class TestModel(unittest.TestCase):
     def setUp(self) -> None:
@@ -28,27 +27,29 @@ class TestModel(unittest.TestCase):
 
 
         """ EXECUTION """
-        #model_store     = ModelStore()
-        #model_store_two = ModelStore.get_instance()
+        model_store = ModelStore(db_connection_string = MONGODB_CONNECTION_STRING, database_name = "test", 
+                                 path_to_dir = PLOT_FOLDER_PATH, verbosity = True)
+        model_store_two = ModelStore.get_instance(db_connection_string = MONGODB_CONNECTION_STRING, database_name = "test",
+                                                  path_to_dir = PLOT_FOLDER_PATH, verbosity = True)
 
 
         """ VERIFICATION """
-        #self.assertEqual(first = model_store, second = model_store_two)
+        self.assertEqual(first = model_store, second = model_store_two)
 
 
-    def test_model_store_db_connectivity_s01(self):
+    def test_model_store_pipe_model_s01(self):
         """
-        Check if database connection is established
+        Pipe a model through the model store
         """
 
         """ PREPARATION """
+        model       = Model(name = "DenseNet121", architecture = self.densenet121)
+        model_store = ModelStore.get_instance(db_connection_string = MONGODB_CONNECTION_STRING, database_name = "test",
+                                              path_to_dir = PLOT_FOLDER_PATH, verbosity = True)
 
 
         """ EXECUTION """
-        try:
-            model_store = ModelStore(db_connection_string = MONGODB_CONNECTION_STRING, database_name = "test")
-        except:
-            print("The MongoDB database connection couldn't be established!")
+        model_store.pipe_models([model])
 
 
         """ VERIFICATION """
