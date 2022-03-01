@@ -3,6 +3,7 @@ import os
 import collections
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 from abc import abstractmethod
@@ -99,7 +100,7 @@ class Plotter(IFPlotter):
 
 
     @staticmethod
-    def display_fit(weight: list, func: Callable, x: Sequence, popt: Sequence) -> None:
+    def display_fit(weight: list, func: Callable, number_of_bins: Sequence, popt: Sequence) -> None:
         """The weight distribution is fitted and the fit is plotted
         with the help of its optimized parameters
 
@@ -114,14 +115,8 @@ class Plotter(IFPlotter):
             popt   : Sequence
                 The fit parameters
         """
-        df     = pd.DataFrame({'weight': weight})
-        df_fit = pd.DataFrame({'fit': func(x, *popt)})
-
-        fig = go.Figure()
-        fig.add_trace(
-            go.Histogram(x = df["weight"], name = "Weight Histogram")
-        )
-        fig.add_trace(
-            go.Line(x = x, y = df_fit["fit"], name = "Fit")
-        )
+        x       = np.linspace(np.min(weight), np.max(weight), 1000)
+        fig, ax = plt.subplots(figsize = (10, 6))
+        ax.hist(x = weight, bins = number_of_bins, label = "Weight Distribution")
+        ax.plot(x, func(x, *popt), label = "Fit")
         fig.show()

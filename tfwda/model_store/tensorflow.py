@@ -2,13 +2,14 @@ import abc
 import tensorflow as tf
 import pymongo
 import collections
+import datetime
 from abc import abstractmethod
 
 import tfwda.model.tensorflow 
 import tfwda.logger.standard    
 import tfwda.serializer.standard 
 import tfwda.plotter.standard    
-import tfwda.fitter.standard    
+import tfwda.analyse.standard    
 import tfwda.utils.errors   
 
 
@@ -62,9 +63,9 @@ class ModelStore(IFModelStore):
             Serializer instance which is responsible for flattening the neural network model
         plotter    : plotter.standard.Plotter
             Plotting instance which will perform all the distribution plots
-        fitter     : fitter.standard.Fitter
-            Fitting instance which will fit different distribution if the user would like
-            to perform a fit on given weight distributions
+        analyser   : analyser.standard.Analyser
+            Analyser instance which processes model data and outputs relevant information on the weight
+            distributions
 
     Methods
     -------
@@ -72,7 +73,7 @@ class ModelStore(IFModelStore):
             Since the model store is a Singleton, this method must be use to fetch an instance, this will be
             the central instance, coordinating and speaking to all the other components
         pipe_models(models list[model.tensorflow.Model])
-            A list of tensorflow models will be serialized, plotted and fitted
+            A list of tensorflow models will be serialized, plotted and analysed
     """
     __instance = None
     __client   = None
@@ -80,6 +81,7 @@ class ModelStore(IFModelStore):
     logger     = None
     serializer = None
     plotter    = None
+    analyser   = None
     
 
     def __init__(self, db_connection_string: str, database_name: str, path_to_dir: str, verbosity: bool) -> None:
@@ -91,7 +93,7 @@ class ModelStore(IFModelStore):
             self.logger     = tfwda.logger.standard.Logger(verbosity)
             self.serializer = tfwda.serializer.standard.Serializer(self.logger)
             self.plotter    = tfwda.plotter.standard.Plotter(self.logger, path_to_dir)
-            self.fitter     = tfwda.fitter.standard.Fitter(self.plotter, self.logger)
+            self.analyser   = tfwda.analyse.standard.Analyser(self.plotter, self.logger)
 
 
     @staticmethod
@@ -141,10 +143,42 @@ class ModelStore(IFModelStore):
             self.plotter.plot(model_name, model_data["weights"], model_data["metadata"])
         self.logger.log("Plotting terminated successfully!", "Info")
 
-        self.logger.log("Fitting process will start now!", "Header")
+        self.logger.log("Analysis process will start now!", "Header")
+        model_information = collections.OrderedDict({'model_names': [], 'extracted_info': []})
         for model_name, model_data in serialized_weights_per_model.items():
-            self.fitter.fit(model_data)
-        self.logger.log("Fitting process terminated successfully!", "Info")
+            extracted_properties = self.analyser.process(model_data)
+            model_information["model_names"].append(model_name)
+            model_information["extracted_info"].append(extracted_properties)
+        self.logger.log("Analysis process terminated successfully!", "Info")
+
+        self.logger.log("Storing persistently extracted analysis information in database...", "Header")
+        collection = self.__database["model_information"]
+        for model_name, info in zip(model_information["model_names"], model_information["extracted_info"]):
+            document = {
+                "model_name": model_name,
+                "date": datetime.datetime.utcnow(),
+                "weights": {
+                    "names": info["names"],
+                    "shapes": info["shapes"],
+                    "dtypes": info["dtypes"],
+                    "minima": info["min"],
+                    "maxima": info["max"],
+                    "means": info["mean"],
+                    "25_quantiles": info["25-quantile"],
+                    "medians": info["median"],
+                    "75_quantiles": info["75-quantile"],
+                    "IQRs": info["IQR"],
+                    "modes": info["mode"],
+                    "variances": info["variance"],
+                    "skewness": info["skewness"],
+                    "kurtosis": info["kurtosis"],
+                    "MADs": info["MAD"]
+                }
+            }
+            collection.insert_one(document)
+        self.logger.log("Data have been successfully stored in the database...", "Info")
+
+        self.logger.log("Successful! All operations are finished!", "Header")
 
 
     def __setup_db_connection(self, db_connection_string: str, database_name: str) -> None:
