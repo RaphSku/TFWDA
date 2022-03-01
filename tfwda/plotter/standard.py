@@ -1,27 +1,52 @@
+import abc
 import os
-import re
+import collections
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from abc import abstractmethod, ABCMeta
-from typing import List
-from collections import OrderedDict
+import plotly.graph_objects as go
+from abc import abstractmethod
+from typing import Callable, Sequence
+
 
 from tfwda.logger.standard import Logger
 
 
-class IFPlotter(metaclass=ABCMeta):
+class IFPlotter(metaclass = abc.ABCMeta):
+    """Interface for the Plotter
+    
+    Methods (abstract)
+    ------------------
+        plot(model_name str, flattened_weight list[np.ndarray], metadata collections.OrderedDict)
+            Responsible for plotting
+    """
+
+
     @abstractmethod
-    def plot(self, model_name: str, flattened_weight: List[np.ndarray], metadata: OrderedDict):
+    def plot(self, model_name: str, flattened_weight: list[np.ndarray], metadata: collections.OrderedDict):
+        """Plotting the flattened model weights
+        
+        Parameters
+        ----------
+            model_name       : str
+                Name of the model
+            flattened_weight : list[np.ndarray]
+                Flattened weights of the model
+            metadata         : collections.OrderedDict
+                Metadata of the weights
+        """
         pass
 
 
 class Plotter(IFPlotter):
-    """
-    The Plotter takes the weights as input and generates the corresponding histograms.
-    Input:
-        - logger      : Logger -> A valid Logger instance
-        - path_to_dir : str    -> Directory where the plots are stored to
+    """The Plotter takes the weights as input and generates the corresponding histograms.
+    
+    Parameters
+    ----------
+        logger      : logger.standard.Logger
+            Logger instance
+        path_to_dir : str
+            Directory where the plots are stored to
     """
 
 
@@ -36,12 +61,67 @@ class Plotter(IFPlotter):
         self.path_to_dir = path_to_dir
     
     
-    def plot(self, model_name: str, flattened_weight: List[np.ndarray], metadata: OrderedDict):
-        """ Plotting the weights and storing these to the corresponding location """
+    def plot(self, model_name: str, flattened_weight: list[np.ndarray], metadata: collections.OrderedDict) -> None:
+        """Plotting the weights and storing these to the location given by `path_to_dir`
+        
+        Parameters
+        ----------
+            model_name : str
+                Name of the model
+            flattened_weight : list[np.ndarray]
+                The flattened weights of the model
+            metadata : collections.OrderedDict
+                Metdata of the weights
+        """
         for weight, name, shape, dtype in zip(flattened_weight, metadata['names'], metadata['shapes'], metadata['dtypes']):
             df  = pd.DataFrame({'weight': weight})
             fig = px.histogram(df, x = "weight", labels = {'x': "Weights", 'y': "Frequency"})
             
-            name = str.replace("/", "_", name)
-            name = str.replace(":", "_", name)
+            name = name.replace("/", "_")
+            name = name.replace(":", "_")
             fig.write_image(f"{self.path_to_dir}/{model_name}_{name}_{shape}_{dtype}.png")
+
+
+    @staticmethod
+    def display_hist(weight: list) -> None:
+        """Is used for plotting a histogram weight plot, the plot is only display
+        and not stored
+        
+        Parameters
+        ----------
+            weight : list
+                A layer of a neural network contains N weights,
+                these weights are given as a list of values
+        """
+        df  = pd.DataFrame({'weight': weight})
+        fig = px.histogram(df, x = "weight", labels = {'x': "Weights", 'y': "Frequency"})
+        fig.show()
+
+
+    @staticmethod
+    def display_fit(weight: list, func: Callable, x: Sequence, popt: Sequence) -> None:
+        """The weight distribution is fitted and the fit is plotted
+        with the help of its optimized parameters
+
+        Parameters
+        ----------
+            weight : list
+                The respective weight which was fitted
+            func   : Callable
+                The fit function
+            x      : Sequence
+                The input or range of the fit
+            popt   : Sequence
+                The fit parameters
+        """
+        df     = pd.DataFrame({'weight': weight})
+        df_fit = pd.DataFrame({'fit': func(x, *popt)})
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Histogram(x = df["weight"], name = "Weight Histogram")
+        )
+        fig.add_trace(
+            go.Line(x = x, y = df_fit["fit"], name = "Fit")
+        )
+        fig.show()

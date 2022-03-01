@@ -2,7 +2,7 @@ import abc
 from abc import abstractmethod
 
 
-import tfwda.utils.coloring
+import utils.coloring
 
 
 class IFLogger(metaclass = abc.ABCMeta):
@@ -73,10 +73,10 @@ class Logger(IFLogger):
         if not self.verbosity:
             return
         if status == "Header":
-            print(f"{tfwda.utils.coloring.TerminalColors.HEADER}{message.upper()}{tfwda.utils.coloring.TerminalColors.ENDC}")
+            print(f"{utils.coloring.TerminalColors.HEADER}{message.upper()}{utils.coloring.TerminalColors.ENDC}")
         if status == "Info":
-            print(f"{tfwda.utils.coloring.TerminalColors.INFO}{message}{tfwda.utils.coloring.TerminalColors.ENDC}")
+            print(f"{utils.coloring.TerminalColors.INFO}{message}{utils.coloring.TerminalColors.ENDC}")
         if status == "Warning":
-            print(f"{tfwda.utils.coloring.TerminalColors.WARNING}{message}{tfwda.utils.coloring.TerminalColors.ENDC}")
+            print(f"{utils.coloring.TerminalColors.WARNING}{message}{utils.coloring.TerminalColors.ENDC}")
         if status == "Error":
-            print(f"{tfwda.utils.coloring.TerminalColors.ERROR}{message}{tfwda.utils.coloring.TerminalColors.ENDC}")
+            print(f"{utils.coloring.TerminalColors.ERROR}{message}{utils.coloring.TerminalColors.ENDC}")
