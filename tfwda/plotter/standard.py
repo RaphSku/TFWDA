@@ -9,7 +9,7 @@ from abc import abstractmethod
 from typing import Callable, Sequence
 
 
-from tfwda.logger.standard import Logger
+import logger.standard
 
 
 class IFPlotter(metaclass = abc.ABCMeta):
@@ -50,7 +50,7 @@ class Plotter(IFPlotter):
     """
 
 
-    def __init__(self, logger: Logger, path_to_dir: str):
+    def __init__(self, logger: logger.standard.Logger, path_to_dir: str):
         self.logger = logger
         if not os.path.exists(path_to_dir):
             self.logger.log(f"The folder {path_to_dir} does not exist, if you want to continue, press Y, if not, press N...", "Warning")
