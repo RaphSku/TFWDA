@@ -4,12 +4,12 @@ import pymongo
 import collections
 from abc import abstractmethod
 
-import model.tensorflow 
-import logger.standard    
-import serializer.standard 
-import plotter.standard    
-import fitter.standard    
-import utils.errors   
+import tfwda.model.tensorflow 
+import tfwda.logger.standard    
+import tfwda.serializer.standard 
+import tfwda.plotter.standard    
+import tfwda.fitter.standard    
+import tfwda.utils.errors   
 
 
 class IFModelStore(metaclass = abc.ABCMeta):
@@ -26,7 +26,7 @@ class IFModelStore(metaclass = abc.ABCMeta):
             Instance of the model store is either initialised or fetched
     """
     @abstractmethod
-    def pipe_models(self, models: list[model.tensorflow.IFModel]):
+    def pipe_models(self, models: list[tfwda.model.tensorflow.IFModel]):
         pass
 
     
@@ -84,14 +84,14 @@ class ModelStore(IFModelStore):
 
     def __init__(self, db_connection_string: str, database_name: str, path_to_dir: str, verbosity: bool) -> None:
         if ModelStore.__instance != None:
-            raise utils.errors.NotCreatedInstanceError("An instance has been already created! Get it with ModelStore.get_instance()!")
+            raise tfwda.utils.errors.NotCreatedInstanceError("An instance has been already created! Get it with ModelStore.get_instance()!")
         ModelStore.__instance = self
         if self.__database == None:
             self.__setup_db_connection(db_connection_string, database_name)
-            self.logger     = logger.standard.Logger(verbosity)
-            self.serializer = serializer.standard.Serializer(self.logger)
-            self.plotter    = plotter.standard.Plotter(self.logger, path_to_dir)
-            self.fitter     = fitter.standard.Fitter(self.plotter, self.logger)
+            self.logger     = tfwda.logger.standard.Logger(verbosity)
+            self.serializer = tfwda.serializer.standard.Serializer(self.logger)
+            self.plotter    = tfwda.plotter.standard.Plotter(self.logger, path_to_dir)
+            self.fitter     = tfwda.fitter.standard.Fitter(self.plotter, self.logger)
 
 
     @staticmethod
@@ -119,7 +119,7 @@ class ModelStore(IFModelStore):
         return ModelStore.__instance
 
 
-    def pipe_models(self, models: list[model.tensorflow.Model]) -> None:
+    def pipe_models(self, models: list[tfwda.model.tensorflow.Model]) -> None:
         """A list of models is processed, meaning that weights are extracted, given to the serializer,
         metadata are written and the plots are generated 
 

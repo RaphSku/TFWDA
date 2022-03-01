@@ -1,8 +1,9 @@
 import abc
-import tensorflow.python.keras.engine.functional
+import tensorflow as tf
+import keras.engine.functional
 
 
-class IFModel(metaclass=abc.ABCMeta):
+class IFModel(metaclass = abc.ABCMeta):
     """Interface for Model which holds the relevant information on
     the neural network model/architecture
     """
@@ -29,9 +30,9 @@ class Model(IFModel):
     """
 
 
-    def __init__(self, name: str, architecture: tensorflow.python.keras.engine.functional.Functional) -> None:
+    def __init__(self, name: str, architecture: keras.engine.functional.Functional) -> None:
         self.name         = name
-        if not isinstance(architecture, tensorflow.python.keras.engine.functional.Functional):
+        if not isinstance(architecture, keras.engine.functional.Functional):
             raise TypeError('The architecture variable has to be of type tf.python.keras.engine.functional.Functional!')
         self.architecture = architecture
         self.summary      = self.architecture.summary

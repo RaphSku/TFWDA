@@ -5,8 +5,8 @@ from abc import abstractmethod
 from typing import Tuple
 
 
-import model.tensorflow
-import logger.standard 
+import tfwda.model.tensorflow
+import tfwda.logger.standard 
 
 
 class IFSerializer(metaclass = abc.ABCMeta):
@@ -21,7 +21,7 @@ class IFSerializer(metaclass = abc.ABCMeta):
 
 
     @abstractmethod
-    def flatten(self, model: model.tensorflow.IFModel):
+    def flatten(self, model: tfwda.model.tensorflow.IFModel):
         """Flattens the model weights
         
         Parameters
@@ -42,11 +42,11 @@ class Serializer(IFSerializer):
     """
 
 
-    def __init__(self, logger: logger.standard.Logger):
+    def __init__(self, logger: tfwda.logger.standard.Logger):
         self.logger = logger
 
 
-    def flatten(self, model: model.tensorflow.Model) -> Tuple[list, collections.OrderedDict]:
+    def flatten(self, model: tfwda.model.tensorflow.Model) -> Tuple[list, collections.OrderedDict]:
         """The weights of the model are extracted and serialized, also the metdata is extracted
 
         Parameters
