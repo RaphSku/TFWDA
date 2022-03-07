@@ -5,21 +5,48 @@ import scipy.stats
 from abc import abstractmethod
 
 
-import tfwda.logger.standard
-import tfwda.plotter.standard 
-
-
 class IFAnalyser(metaclass = abc.ABCMeta):
-    pass
+    """Interface for the Analyser which processes data and computes
+    statistics and metrics
+    
+    Methods (abstract)
+    ------------------
+        process(data : dict[str, np.ndarray]) dict[str, list]
+            Computes statistics and metrics and returns them as a dict
+    """
+    
+
+    @abstractmethod
+    def process(self, data: dict[str, np.ndarray]) -> dict[str, list]:
+        """Data is processed, metrics and statistics are extracted out of data
+        and stored in a dictionary
+        
+        Parameters
+        ----------
+            data : dict[str, np.ndarray]
+                Data is a dictionary with key-value pairs, the key describes an attribute
+                and the array is filled with its measured values
+        """
+        pass
 
 
 class Analyser(IFAnalyser):
-    def __init__(self, plotter: tfwda.plotter.standard.Plotter, logger: tfwda.logger.standard.Logger) -> None:
-        self.plotter     = plotter
-        self.logger      = logger
+    """Extracts weights and metadata and computes statistics and
+    metrics out of the data and store them in a property dictionary
+
+    Methods
+    -------
+        process(data : dict[str, np.ndarray]) dict[str, list]
+            `data` contains weights of the neural network model and metadata, process computes
+            a series of metrics, e.g. median, MAD,...
+    """
 
 
-    def process(self, data):
+    def __init__(self):
+        pass
+
+
+    def process(self, data: dict[str, np.ndarray]) -> dict[str, list]:
         weights  = data["weights"]
         metadata = data["metadata"]
 
