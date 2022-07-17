@@ -28,4 +28,4 @@ The upper image shows a document which gets inserted with all the information ab
 
 [contributors-shield]: https://img.shields.io/badge/Author-RaphSku-orange?style=plastic&labelColor=black
 [license-shield]: https://img.shields.io/badge/License-MIT+-informational?style=plastic&labelColor=black
-[version-shield]: https://img.shields.io/badge/Version-1.0-red?style=plastic&labelColor=black
+[version-shield]: https://img.shields.io/badge/Version-1.0.0-red?style=plastic&labelColor=black
